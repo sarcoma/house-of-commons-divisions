@@ -15,16 +15,6 @@ def getData(url):
     return json.loads(response.content)
 
 
-class MPVote:
-    def __init__(self, name, party, vote):
-        self.name = name
-        self.party = party
-        self.vote = vote
-
-    def __repr__(self):
-        return "%s, %s\nVoted: %s" % (self.name, self.party, self.vote)
-
-
 def make_commons_division(primary_topic):
     data = {
         'uin': primary_topic['uin'],
@@ -42,9 +32,7 @@ def make_commons_division(primary_topic):
     return CommonsDivision(**data)
 
 
-def make_mp(vote):
-    name = vote['memberPrinted']['_value']
-    party = vote['memberParty']
+def find_mp(name, party):
 
     return MemberOfParliament(name=name, party=party)
 
@@ -80,7 +68,7 @@ if __name__ == '__main__':
         session.add(commons_division)
         votes = primary_topic['vote']
         for vote in votes:
-            mp = make_mp(vote)
+            mp = find_mp(vote['memberPrinted']['_value'], vote['memberParty'])
             session.add(mp)
             session.add(make_vote(vote, mp, commons_division))
 

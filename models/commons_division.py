@@ -8,7 +8,7 @@ class CommonsDivision(Base):
     __tablename__ = 'commons_division'
 
     id = Column(Integer, primary_key=True)
-    uin = Column(String)
+    uin = Column(String, unique=True)
     title = Column(String)
     session = Column(String)
     division_number = Column(Integer)

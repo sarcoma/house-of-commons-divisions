@@ -32,8 +32,7 @@ def make_commons_division(primary_topic):
     return CommonsDivision(**data)
 
 
-def find_mp(name, party):
-
+def make_mp(name, party):
     return MemberOfParliament(name=name, party=party)
 
 
@@ -64,12 +63,22 @@ if __name__ == '__main__':
         data = getData(url)
         result = data['result']
         primary_topic = result['primaryTopic']
-        commons_division = make_commons_division(primary_topic)
-        session.add(commons_division)
-        votes = primary_topic['vote']
-        for vote in votes:
-            mp = find_mp(vote['memberPrinted']['_value'], vote['memberParty'])
-            session.add(mp)
-            session.add(make_vote(vote, mp, commons_division))
+        uin = primary_topic['uin']
+        if not session.query(CommonsDivision).filter(CommonsDivision.uin == uin).one_or_none():
+            commons_division = make_commons_division(primary_topic)
+            session.add(commons_division)
+            votes = primary_topic['vote']
+            for vote in votes:
+                query = session \
+                    .query(MemberOfParliament) \
+                    .filter(
+                    MemberOfParliament.name == vote['memberPrinted']['_value'],
+                    MemberOfParliament.party == vote['memberParty']
+                )
+                mp = query.one_or_none()
+                if not mp:
+                    mp = make_mp(vote['memberPrinted']['_value'], vote['memberParty'])
+                    session.add(mp)
+                session.add(make_vote(vote, mp, commons_division))
 
         session.commit()

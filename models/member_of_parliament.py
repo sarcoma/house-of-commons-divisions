@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, Date
-from sqlalchemy.orm import relationship
 
 from orm import Base
 
@@ -15,10 +14,10 @@ class MemberOfParliament(Base):
     pims_id = Column(Integer)
     full_title = Column(String)
     date_of_birth = Column(Date)
-    date_of_death = Column(Date)
+    date_of_death = Column(Date, nullable=True)
     gender = Column(String)
     party = Column(String)
+    member_since = Column(Date)
     start_date = Column(Date)
-    end_data = Column(Date, nullable=True)
+    end_date = Column(Date, nullable=True)
     constituency = Column(String)
-    votes = relationship("Vote", back_populates='member_of_parliament')

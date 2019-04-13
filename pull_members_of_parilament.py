@@ -1,34 +1,65 @@
+from datetime import datetime
+
 import requests
 from bs4 import BeautifulSoup as bs
-
 
 # Todo: Pull data about MPs from http://data.parliament.uk/membersdataplatform/memberquery.aspx#membershipinfotable
 # Note: eg http://data.parliament.uk/membersdataplatform/services/mnis/members/query/commonsmemberbetween=2012-01-01and2012-03-31/
 #       Look up data for MPs on any given division day. Compare votes against that list. Add any missing MPs to the database.
+from models.member_of_parliament import MemberOfParliament
+from orm import session_factory, drop_all
+
 
 def getMembersForDate(date):
-    url = 'http://data.parliament.uk/membersdataplatform/services/mnis/members/query'
-    response = requests.get('%s/commonsmemberbetween=%sand%s' % (url, date, date))
-    return bs(response.content, "lxml-xml")
+    url = "http://data.parliament.uk/membersdataplatform/services/mnis/members/query"
+    response = requests.get("%s/commonsmemberbetween=%sand%s" % (url, date, date))
+    soup = bs(response.content, "lxml-xml")
+    return soup.find_all("Member")
 
 
-if __name__ == '__main__':
-    soup = getMembersForDate('2016-01-01')
-    members = soup.find_all('Member')
-    print(len(members))
+def make_date(date_str):
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
+    except TypeError:
+        return None
+
+
+def make_mp(member_data):
+    return MemberOfParliament(
+        clerks_id=member_data.get("Clerks_Id"),
+        dods_id=member_data.get("Dods_Id"),
+        member_id=member_data.get("Member_Id"),
+        pims_id=member_data.get("Pims_Id"),
+        name=member_data.find("DisplayAs").string,
+        full_title=member_data.find("FullTitle").string,
+        gender=member_data.find("Gender").string,
+        party=member_data.find("Party").string,
+        constituency=member_data.find("MemberFrom").string,
+        date_of_birth=make_date(member_data.find("DateOfBirth").string),
+        date_of_death=make_date(member_data.find("DateOfDeath").string),
+        member_since=make_date(member_data.find("HouseStartDate").string),
+        end_date=make_date(member_data.find("HouseEndDate").string),
+        start_date=make_date(member_data.find("StartDate").string)
+    )
+
+
+def create_mps_for_date(date, session=None):
+    session = session or session_factory()
+    members = getMembersForDate(date.strftime("%Y-%m-%d"))
     for member in members:
-        print(member)
-        print(member.get('Clerks_Id'))
-        print(member.get('Dods_Id'))
-        print(member.get('Member_Id'))
-        print(member.get('Pims_Id'))
-        print(member.find('DisplayAs').string)
-        print(member.find('FullTitle').string)
-        print(member.find('Gender').string)
-        print(member.find('Party').string)
-        print(member.find('MemberFrom').string)
-        print(member.find('DateOfBirth').string)
-        print(member.find('DateOfDeath').string)
-        print(member.find('HouseStartDate').string)
-        print(member.find('HouseEndDate').string)
-        print(member.find('StartDate').string)
+        mp_data = make_mp(member)
+        query = session \
+            .query(MemberOfParliament) \
+            .filter(
+            MemberOfParliament.member_id == mp_data.member_id,
+        )
+        mp = query.one_or_none()
+        if not mp:
+            session.add(mp_data)
+    session.commit()
+
+
+if __name__ == "__main__":
+    drop_all()
+    session = session_factory()
+    create_mps_for_date(datetime(2019, 2, 1), session)

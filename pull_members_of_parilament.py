@@ -12,7 +12,9 @@ from orm import session_factory, drop_all
 
 def getMembersForDate(date):
     url = "http://data.parliament.uk/membersdataplatform/services/mnis/members/query"
-    response = requests.get("%s/commonsmemberbetween=%sand%s" % (url, date, date))
+    url_with_dates = "%s/commonsmemberbetween=%sand%s" % (url, date, date)
+    print(url_with_dates)
+    response = requests.get(url_with_dates)
     soup = bs(response.content, "lxml-xml")
     return soup.find_all("Member")
 

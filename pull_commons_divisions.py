@@ -87,6 +87,7 @@ def pull_commons_divisions(url):
             create_mps_for_date(commons_division.date, session)
             votes = primary_topic['vote']
             for vote in votes:
+                # Todo: Can pull additional info from _about: http://eldaddp.azurewebsites.net/members/4082
                 query = session \
                     .query(MemberOfParliament) \
                     .filter(

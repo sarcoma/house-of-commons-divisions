@@ -8,6 +8,11 @@ from models.commons_division import CommonsDivision
 from models.member_of_parliament import MemberOfParliament
 from models.vote import Vote
 from orm import session_factory, drop_all
+from pull_members_of_parilament import create_mps_for_date
+
+
+class MPNotFound(Exception):
+    pass
 
 
 def getData(url):
@@ -67,18 +72,17 @@ if __name__ == '__main__':
         if not session.query(CommonsDivision).filter(CommonsDivision.uin == uin).one_or_none():
             commons_division = make_commons_division(primary_topic)
             session.add(commons_division)
+            create_mps_for_date(commons_division.date, session)
             votes = primary_topic['vote']
             for vote in votes:
                 query = session \
                     .query(MemberOfParliament) \
                     .filter(
                     MemberOfParliament.name == vote['memberPrinted']['_value'],
-                    MemberOfParliament.party == vote['memberParty']
                 )
                 mp = query.one_or_none()
                 if not mp:
-                    mp = make_mp(vote['memberPrinted']['_value'], vote['memberParty'])
-                    session.add(mp)
+                    raise MPNotFound("%s, %s" % (vote['memberPrinted']['_value'], vote['memberParty']))
                 session.add(make_vote(vote, mp, commons_division))
 
         session.commit()

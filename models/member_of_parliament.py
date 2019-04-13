@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy.orm import relationship
 
 from orm import Base
 
@@ -21,3 +22,4 @@ class MemberOfParliament(Base):
     start_date = Column(Date)
     end_date = Column(Date, nullable=True)
     constituency = Column(String)
+    votes = relationship("Vote", back_populates='member_of_parliament')

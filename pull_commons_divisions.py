@@ -1,6 +1,8 @@
 import json
 import re
 from datetime import datetime
+from json import JSONDecodeError
+from time import sleep
 
 import requests
 
@@ -16,8 +18,17 @@ class MPNotFound(Exception):
 
 
 def getData(url):
-    response = requests.get("%s.json" % url)
-    return json.loads(response.content)
+    try:
+        response = requests.get(url)
+        return json.loads(response.content)
+    except JSONDecodeError:
+        print('Error: %s' % JSONDecodeError)
+        print('Retrying: %s' % url)
+        for i in range(3):
+            print('.', end='')
+            sleep(1)
+        print('\n')
+        return False
 
 
 def make_commons_division(primary_topic):
@@ -51,12 +62,11 @@ def make_vote(vote, mp, commons_division):
     return vote
 
 
-if __name__ == '__main__':
-    drop_all()
-    data = getData('http://eldaddp.azurewebsites.net/commonsdivisions')
+def pull_commons_divisions(url):
+    data = get_data_or_retry(url)
     result = data['result']
+    next_url = result['next']
     items = result['items']
-
     for item in items:
         session = session_factory()
         url = item['_about']
@@ -65,7 +75,9 @@ if __name__ == '__main__':
             'http://eldaddp.azurewebsites.net/commonsdivisions/id/',
             url
         )
-        data = getData(url)
+        division_url = "%s.json" % url
+        print(division_url)
+        data = get_data_or_retry(division_url)
         result = data['result']
         primary_topic = result['primaryTopic']
         uin = primary_topic['uin']
@@ -86,3 +98,22 @@ if __name__ == '__main__':
                 session.add(make_vote(vote, mp, commons_division))
 
         session.commit()
+
+    return next_url
+
+
+def get_data_or_retry(url):
+    data = False
+    while not data:
+        data = getData(url)
+    return data
+
+
+if __name__ == '__main__':
+    drop_all()
+    next_url = 'http://eldaddp.azurewebsites.net/commonsdivisions.json?_page=0'
+    while True:
+        next_url = pull_commons_divisions(next_url)
+        print(next_url)
+        if not next_url:
+            break

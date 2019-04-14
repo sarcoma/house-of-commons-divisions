@@ -10,13 +10,21 @@ from models.member_of_parliament import MemberOfParliament
 from orm import session_factory, drop_all
 
 
-def getMembersForDate(date):
+def get_members_for_date(date):
     url = "http://data.parliament.uk/membersdataplatform/services/mnis/members/query"
     url_with_dates = "%s/commonsmemberbetween=%sand%s" % (url, date, date)
-    print(url_with_dates)
+    print('Fetching: ' + url_with_dates)
     response = requests.get(url_with_dates)
     soup = bs(response.content, "lxml-xml")
     return soup.find_all("Member")
+
+
+def get_member(id):
+    url = 'http://data.parliament.uk/membersdataplatform/services/mnis/members/query/id=' + id
+    print('Fetching: ' + url)
+    response = requests.get(url)
+    soup = bs(response.content, "lxml-xml")
+    return soup
 
 
 def make_date(date_str):
@@ -47,18 +55,29 @@ def make_mp(member_data):
 
 def create_mps_for_date(date, session=None):
     session = session or session_factory()
-    members = getMembersForDate(date.strftime("%Y-%m-%d"))
+    members = get_members_for_date(date.strftime("%Y-%m-%d"))
+    mps = []
     for member in members:
-        mp_data = make_mp(member)
-        query = session \
-            .query(MemberOfParliament) \
-            .filter(
-            MemberOfParliament.member_id == mp_data.member_id,
-        )
-        mp = query.one_or_none()
-        if not mp:
-            session.add(mp_data)
+        mp = create_mp(member, session)
+        mps.append(mp)
     session.commit()
+
+    return mps
+
+
+def create_mp(member_data, session=None):
+    session = session or session_factory()
+    query = session \
+        .query(MemberOfParliament) \
+        .filter(
+        MemberOfParliament.member_id == member_data.get("Member_Id"),
+    )
+    mp = query.one_or_none()
+    if not mp:
+        mp = make_mp(member_data)
+        session.add(mp)
+
+    return mp
 
 
 if __name__ == "__main__":

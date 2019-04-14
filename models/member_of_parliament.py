@@ -8,12 +8,12 @@ class MemberOfParliament(Base):
     __tablename__ = 'member_of_parliament'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String, index=True)
     clerks_id = Column(Integer)
     dods_id = Column(Integer)
-    member_id = Column(Integer)
+    member_id = Column(Integer, index=True)
     pims_id = Column(Integer)
-    full_title = Column(String)
+    full_title = Column(String, index=True)
     date_of_birth = Column(Date)
     date_of_death = Column(Date, nullable=True)
     gender = Column(String)
@@ -21,7 +21,7 @@ class MemberOfParliament(Base):
     member_since = Column(Date)
     start_date = Column(Date)
     end_date = Column(Date, nullable=True)
-    constituency = Column(String)
+    constituency = Column(String, index=True)
     votes = relationship("Vote", back_populates='member_of_parliament')
 
     def __hash__(self):

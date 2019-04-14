@@ -23,3 +23,18 @@ class MemberOfParliament(Base):
     end_date = Column(Date, nullable=True)
     constituency = Column(String)
     votes = relationship("Vote", back_populates='member_of_parliament')
+
+    def __hash__(self):
+        return hash((self.id, self.member_id))
+
+    def __eq__(self, other):
+        try:
+            return (self.id, self.member_id) == (other.id, other.member_id)
+        except AttributeError:
+            return NotImplemented
+
+    def __ne__(self, other):
+        try:
+            return (self.id, self.member_id) != (other.id, other.member_id)
+        except AttributeError:
+            return NotImplemented

@@ -9,7 +9,7 @@ import requests
 from models.commons_division import CommonsDivision
 from models.member_of_parliament import MemberOfParliament
 from models.vote import Vote
-from orm import session_factory, drop_all
+from orm import session_factory
 from pull_members_of_parilament import create_mps_for_date, get_member, create_mp
 
 
@@ -50,8 +50,9 @@ def get_about_url(item, replace, endpoint):
     return url + '.json'
 
 
-def make_commons_division(primary_topic):
+def make_commons_division(id, primary_topic):
     data = {
+        'division_id': id,
         'uin': primary_topic['uin'],
         'title': primary_topic['title'],
         'session': primary_topic['session'][0],
@@ -92,13 +93,16 @@ def pull_commons_divisions(url):
     for item in items:
         session = session_factory()
         division_url = get_about_url(item, '/resources/', '/commonsdivisions/id/')
-        print('Fetching: ' + division_url)
-        division_data = get_data_or_retry(division_url)
-        result = division_data['result']
-        primary_topic = result['primaryTopic']
-        uin = primary_topic['uin']
-        if not session.query(CommonsDivision).filter(CommonsDivision.uin == uin).one_or_none():
-            commons_division = make_commons_division(primary_topic)
+        division_id = int(re.search('(\d+).json$', division_url).group(1))
+        found_commons_division = session.query(CommonsDivision) \
+            .filter(CommonsDivision.division_id == division_id) \
+            .one_or_none()
+        if not found_commons_division:
+            division_data = get_data_or_retry(division_url)
+            print('Fetching: ' + division_url)
+            result = division_data['result']
+            primary_topic = result['primaryTopic']
+            commons_division = make_commons_division(division_id, primary_topic)
             session.add(commons_division)
             votes = primary_topic['vote']
             all_mps = set(create_mps_for_date(commons_division.date, session))
@@ -128,7 +132,7 @@ def pull_commons_divisions(url):
 
 
 if __name__ == '__main__':
-    drop_all()
+    # drop_all()
     next_url = 'http://eldaddp.azurewebsites.net/commonsdivisions.json?_page=0'
     while True:
         print('Fetching: ' + next_url)

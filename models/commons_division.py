@@ -8,11 +8,12 @@ class CommonsDivision(Base):
     __tablename__ = 'commons_division'
 
     id = Column(Integer, primary_key=True)
+    division_id = Column(Integer, unique=True)
     uin = Column(String, unique=True)
-    title = Column(String)
+    title = Column(String, index=True)
     session = Column(String)
     division_number = Column(Integer)
-    date = Column(Date)
+    date = Column(Date, index=True)
     deferred_vote = Column(Boolean)
     non_eligible = Column(Integer)
     suspended = Column(Integer)

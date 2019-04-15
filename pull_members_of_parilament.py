@@ -13,7 +13,7 @@ from orm import session_factory, drop_all
 def get_members_for_date(date):
     url = "http://data.parliament.uk/membersdataplatform/services/mnis/members/query"
     url_with_dates = "%s/commonsmemberbetween=%sand%s" % (url, date, date)
-    print('Fetching: ' + url_with_dates)
+    print('Fetching Members On Date: ' + url_with_dates)
     response = requests.get(url_with_dates)
     soup = bs(response.content, "lxml-xml")
     return soup.find_all("Member")
@@ -21,7 +21,7 @@ def get_members_for_date(date):
 
 def get_member(id):
     url = 'http://data.parliament.uk/membersdataplatform/services/mnis/members/query/id=' + id
-    print('Fetching: ' + url)
+    print('Fetching Member: ' + url)
     response = requests.get(url)
     soup = bs(response.content, "lxml-xml")
     return soup

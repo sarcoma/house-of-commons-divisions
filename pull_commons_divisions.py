@@ -50,7 +50,9 @@ def get_about_url(item, replace, endpoint):
     return url + '.json'
 
 
-def make_commons_division(id, primary_topic):
+def make_commons_division(id, commons_division_data):
+    primary_topic = get_primary_topic(commons_division_data)
+
     data = {
         'division_id': id,
         'uin': primary_topic['uin'],
@@ -86,53 +88,98 @@ def make_vote(vote, mp, commons_division):
 
 
 def pull_commons_divisions(url):
-    division_data = get_data_or_retry(url)
-    result = division_data['result']
-    next_url = result['next']
-    items = result['items']
-    for item in items:
+    commons_division_data_list, next_url = get_commons_divisions_list(url)
+    for commons_division_data in commons_division_data_list:
         session = session_factory()
-        division_url = get_about_url(item, '/resources/', '/commonsdivisions/id/')
-        division_id = int(re.search('(\d+).json$', division_url).group(1))
-        found_commons_division = session.query(CommonsDivision) \
-            .filter(CommonsDivision.division_id == division_id) \
-            .one_or_none()
-        if not found_commons_division:
-            division_data = get_data_or_retry(division_url)
-            print('Fetching: ' + division_url)
-            result = division_data['result']
-            primary_topic = result['primaryTopic']
-            commons_division = make_commons_division(division_id, primary_topic)
-            session.add(commons_division)
-            votes = primary_topic['vote']
-            all_mps = set(create_mps_for_date(commons_division.date, session))
-            mps_who_voted = set()
-            for vote in votes:
-                # Todo: Can pull additional info from _about: http://eldaddp.azurewebsites.net/members/4082
-                member_about_url = vote['member'][0]['_about']
-                member_id = re.search('\d+$', member_about_url).group(0)
-                query = session \
-                    .query(MemberOfParliament) \
-                    .filter(
-                    MemberOfParliament.member_id == member_id,
-                )
-                mp = query.one_or_none()
-                if not mp:
-                    member = get_member(member_id)
-                    mp = create_mp(member, session)
-                mps_who_voted.add(mp)
-                session.add(make_vote(vote, mp, commons_division))
-
-            for mp in all_mps - mps_who_voted:
-                session.add(make_vote(None, mp, commons_division))
+        division_url = get_division_url(commons_division_data)
+        division_id = get_division_id(division_url)
+        commons_division = find_commons_division(division_id, session)
+        if not commons_division:
+            save_commons_division(division_id, division_url, session)
 
         session.commit()
 
     return next_url
 
 
+def get_division_id(division_url):
+    division_id = int(re.search('(\d+).json$', division_url).group(1))
+    return division_id
+
+
+def get_division_url(commons_division_data):
+    division_url = get_about_url(commons_division_data, '/resources/', '/commonsdivisions/id/')
+    return division_url
+
+
+def save_commons_division(division_id, division_url, session):
+    commons_division, votes = get_commons_division(division_id, division_url)
+    session.add(commons_division)
+
+    save_votes(commons_division, votes, session)
+
+
+def get_votes(commons_division_data):
+    return commons_division_data['result']['primaryTopic']['vote']
+
+
+def get_primary_topic(commons_division_data):
+    return commons_division_data['result']['primaryTopic']
+
+
+def get_commons_division(division_id, division_url):
+    commons_division_data = get_data_or_retry(division_url)
+    print('Fetching Division: ' + division_url)
+    commons_division = make_commons_division(division_id, commons_division_data)
+    votes = get_votes(commons_division_data)
+    return commons_division, votes
+
+
+def save_votes(commons_division, votes, session):
+    all_mps = set(create_mps_for_date(commons_division.date, session))
+    mps_who_voted = set()
+    for vote in votes:
+        # Todo: Can pull additional info from _about: http://eldaddp.azurewebsites.net/members/4082
+        member_id, mp = find_mp(session, vote)
+        if not mp:
+            members = get_member(member_id)
+            member = members.find_all("Member")
+            mp = create_mp(member, session)
+            all_mps.add(mp)
+        mps_who_voted.add(mp)
+        session.add(make_vote(vote, mp, commons_division))
+    for mp in all_mps - mps_who_voted:
+        session.add(make_vote(None, mp, commons_division))
+
+
+def find_mp(session, vote):
+    member_about_url = vote['member'][0]['_about']
+    member_id = re.search('\d+$', member_about_url).group(0)
+    query = session \
+        .query(MemberOfParliament) \
+        .filter(
+        MemberOfParliament.member_id == member_id,
+    )
+    mp = query.one_or_none()
+    return member_id, mp
+
+
+def find_commons_division(division_id, session):
+    commons_division_data = session.query(CommonsDivision) \
+        .filter(CommonsDivision.division_id == division_id) \
+        .one_or_none()
+    return commons_division_data
+
+
+def get_commons_divisions_list(url):
+    division_data = get_data_or_retry(url)
+    result = division_data['result']
+    next_url = result['next']
+    items = result['items']
+    return items, next_url
+
+
 if __name__ == '__main__':
-    # drop_all()
     next_url = 'http://eldaddp.azurewebsites.net/commonsdivisions.json?_page=0'
     while True:
         print('Fetching: ' + next_url)

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Date
 from sqlalchemy.orm import relationship
 
-from orm import Base
+from orm.base import Base
 
 
 class MemberOfParliament(Base):

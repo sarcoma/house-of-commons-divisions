@@ -3,7 +3,7 @@ import enum
 from sqlalchemy import Column, Integer, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 
-from orm import Base
+from orm.base import Base
 
 
 class VoteType(enum.Enum):

@@ -4,6 +4,10 @@ from sqlalchemy.pool import StaticPool
 
 from orm.base import Base
 
+from models import commons_division
+from models import member_of_parliament
+from models import vote
+
 engine = create_engine('sqlite:///commons-divisions.db',
                        connect_args={'check_same_thread': False},
                        poolclass=StaticPool)

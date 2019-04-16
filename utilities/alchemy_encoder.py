@@ -14,7 +14,7 @@ class AlchemyEncoder(JSONEncoder):
                     json.dumps(data)
                     fields[field] = data
                 except TypeError:
-                    fields[field] = None
+                    pass
 
             return fields
 

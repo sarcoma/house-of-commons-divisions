@@ -23,9 +23,12 @@ class Vote(Base):
     member_of_parliament = relationship("MemberOfParliament", back_populates='votes')
 
     def set_vote_type(self, vote_type):
-        if VoteType[vote_type.lower()] is VoteType.aye:
-            self.vote_type = VoteType.aye
-        elif VoteType[vote_type.lower()] is VoteType.no:
-            self.vote_type = VoteType.no
-        else:
+        try:
+            if VoteType[vote_type.lower()] is VoteType.aye:
+                self.vote_type = VoteType.aye
+            elif VoteType[vote_type.lower()] is VoteType.no:
+                self.vote_type = VoteType.no
+            else:
+                self.vote_type = VoteType.no_vote
+        except KeyError:
             self.vote_type = VoteType.no_vote

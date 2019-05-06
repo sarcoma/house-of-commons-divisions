@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup as bs
 # Note: eg http://data.parliament.uk/membersdataplatform/services/mnis/members/query/commonsmemberbetween=2012-01-01and2012-03-31/
 #       Look up data for MPs on any given division day. Compare votes against that list. Add any missing MPs to the database.
 from models.member_of_parliament import MemberOfParliament
-from orm import session_factory, drop_all
+from orm.orm import session_factory, drop_all
 
 
 def get_members_for_date(date):
@@ -24,7 +24,7 @@ def get_member(id):
     print('Fetching Member: ' + url)
     response = requests.get(url)
     soup = bs(response.content, "lxml-xml")
-    return soup
+    return soup.find("Member")
 
 
 def make_date(date_str):
@@ -81,6 +81,6 @@ def create_mp(member_data, session=None):
 
 
 if __name__ == "__main__":
-    drop_all()
+    # drop_all()
     session = session_factory()
     create_mps_for_date(datetime(2019, 2, 1), session)

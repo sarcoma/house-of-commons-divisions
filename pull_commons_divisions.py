@@ -9,7 +9,7 @@ import requests
 from models.commons_division import CommonsDivision
 from models.member_of_parliament import MemberOfParliament
 from models.vote import Vote
-from orm import session_factory
+from orm.orm import session_factory
 from pull_members_of_parilament import create_mps_for_date, get_member, create_mp
 
 
@@ -52,7 +52,6 @@ def get_about_url(item, replace, endpoint):
 
 def make_commons_division(id, commons_division_data):
     primary_topic = get_primary_topic(commons_division_data)
-
     data = {
         'division_id': id,
         'uin': primary_topic['uin'],
@@ -70,15 +69,14 @@ def make_commons_division(id, commons_division_data):
     return CommonsDivision(**data)
 
 
-def make_mp(name, party):
-    return MemberOfParliament(name=name, party=party)
-
-
 def make_vote(vote, mp, commons_division):
-    if vote:
-        vote_type = re.search(r'(?:#)(\w+?)(?:Vote)', vote['type'])
-        vote_type = vote_type.group(1)
-    else:
+    try:
+        if vote:
+            vote_type = re.search(r'(?:#)(\w+?)(?:Vote)', vote['type'])
+            vote_type = vote_type.group(1)
+        else:
+            vote_type = 'no_vote'
+    except AttributeError:
         vote_type = 'no_vote'
     vote = Vote()
     vote.set_vote_type(vote_type)
@@ -142,8 +140,7 @@ def save_votes(commons_division, votes, session):
         # Todo: Can pull additional info from _about: http://eldaddp.azurewebsites.net/members/4082
         member_id, mp = find_mp(session, vote)
         if not mp:
-            members = get_member(member_id)
-            member = members.find_all("Member")
+            member = get_member(member_id)
             mp = create_mp(member, session)
             all_mps.add(mp)
         mps_who_voted.add(mp)

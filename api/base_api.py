@@ -27,7 +27,7 @@ class BaseApi(metaclass=ABCMeta):
         }
 
     def get_detail_by_id(self, item_id):
-        data = self.session.query(self.model).filter(self.model.id == item_id)
+        data = self.session.query(self.model).filter(self.model.id == item_id).first()
         return data
 
     def post(self, data):

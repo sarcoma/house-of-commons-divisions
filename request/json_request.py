@@ -1,7 +1,7 @@
 from flask import request
 
 
-class JsonRequestHandler:
+class JsonRequest:
     @staticmethod
     def get(api):
         return api.get()
@@ -19,11 +19,11 @@ class JsonRequestHandler:
         return api.delete(item_id)
 
     @staticmethod
-    def list(api, paginated=True):
+    def list(api, page=1, limit=25, paginated=True):
         if request.method == 'POST':
             return api.post(request.get_json())
         elif request.method == 'GET':
-            return api.get_paginated_list() if paginated else api.get_list()
+            return api.get_paginated_list(page, limit) if paginated else api.get_list()
 
     @staticmethod
     def detail(api, item_id):

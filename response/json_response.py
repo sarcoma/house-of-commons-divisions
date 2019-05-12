@@ -1,20 +1,17 @@
 import json
+from functools import wraps
 
-from drone_squadron.error.error import Error
-from drone_squadron.transformer.json_transformer import JsonTransformer
+from flask import Response
+
+from utilities.alchemy_encoder import AlchemyEncoder
 
 
-def json_response(data, status=200):
-    if isinstance(data, Error):
-        status = data.get_status_code()
-        data = data.get_error()
-    else:
-        data = JsonTransformer().get_data(data)
-    from drone_squadron.main import app
-    response = app.response_class(
-        response=json.dumps(data),
-        status=status,
-        mimetype='application/json'
-    )
+def json_response(func):
+    @wraps(func)
+    def wrapped_function(**kwargs):
+        return Response(
+            response=json.dumps(func(**kwargs), cls=AlchemyEncoder),
+            mimetype='application/json'
+        )
 
-    return response
+    return wrapped_function

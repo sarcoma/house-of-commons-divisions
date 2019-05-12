@@ -10,7 +10,7 @@ from models.commons_division import CommonsDivision
 from models.member_of_parliament import MemberOfParliament
 from models.vote import Vote
 from orm.orm import session_factory
-from pull_members_of_parilament import create_mps_for_date, get_member, create_mp
+from pull_data.pull_members_of_parilament import create_mps_for_date, get_member, create_mp
 
 
 class MPNotFound(Exception):

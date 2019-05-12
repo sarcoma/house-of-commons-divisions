@@ -1,37 +1,35 @@
 from flask import request
 
-from drone_squadron.response.json_response import json_response
-
 
 class JsonRequestHandler:
     @staticmethod
     def get(api):
-        return json_response(api.get())
+        return api.get()
 
     @staticmethod
     def post(api):
-        return json_response(api.post(request.get_json()))
+        return api.post(request.get_json())
 
     @staticmethod
     def put(api, item_id):
-        return json_response(api.put(item_id, request.get_json()))
+        return api.put(item_id, request.get_json())
 
     @staticmethod
     def delete(api, item_id):
-        return json_response(api.delete(item_id))
+        return api.delete(item_id)
 
     @staticmethod
-    def list(api):
+    def list(api, paginated=True):
         if request.method == 'POST':
-            return json_response(api.post(request.get_json()))
+            return api.post(request.get_json())
         elif request.method == 'GET':
-            return json_response(api.get())
+            return api.get_paginated_list() if paginated else api.get_list()
 
     @staticmethod
     def detail(api, item_id):
         if request.method == 'PUT':
-            return json_response(api.put(item_id, request.get_json()))
+            return api.put(item_id, request.get_json())
         elif request.method == 'DELETE':
-            return json_response(api.delete(item_id))
+            return api.delete(item_id)
         elif request.method == 'GET':
-            return json_response(api.get_by_id(item_id))
+            return api.get_detail_by_id(item_id)

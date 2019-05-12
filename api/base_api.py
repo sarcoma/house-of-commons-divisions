@@ -16,7 +16,15 @@ class BaseApi(metaclass=ABCMeta):
 
     def get_paginated_list(self, page=1, limit=25):
         data = self.session.query(self.model).all()[limit * page - limit:limit * page]
-        return data
+        total = self.session.query(self.model).count()
+        return {
+            "data": data,
+            "meta": {
+                "total": total,
+                "page": page,
+                "limit": limit,
+            }
+        }
 
     def get_detail_by_id(self, item_id):
         data = self.session.query(self.model).filter(self.model.id == item_id)

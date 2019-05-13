@@ -10,7 +10,6 @@ class CommonsDivisionApi(BaseApi):
 
     def get_detail_by_id(self, item_id):
         data = self.session.query(self.model) \
-            .options(joinedload('votes')) \
             .filter(self.model.id == item_id) \
             .first()
 

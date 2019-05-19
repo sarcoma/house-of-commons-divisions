@@ -2,15 +2,14 @@ import json
 from functools import wraps
 
 from flask import Response
-
-from utilities.alchemy_encoder import AlchemyEncoder
+from flask.json import JSONEncoder
 
 
 def json_response(func):
     @wraps(func)
     def wrapped_function(**kwargs):
         return Response(
-            response=json.dumps(func(**kwargs), cls=AlchemyEncoder),
+            response=json.dumps(func(**kwargs), cls=JSONEncoder),
             mimetype='application/json'
         )
 

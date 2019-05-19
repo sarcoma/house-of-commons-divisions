@@ -10,7 +10,8 @@ from models import vote
 
 engine = create_engine('sqlite:///commons-divisions.db',
                        connect_args={'check_same_thread': False},
-                       poolclass=StaticPool)
+                       poolclass=StaticPool,
+                       )
 
 Session = sessionmaker(bind=engine)
 

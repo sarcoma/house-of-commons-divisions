@@ -22,7 +22,26 @@ class MemberOfParliament(Base):
     start_date = Column(Date)
     end_date = Column(Date, nullable=True)
     constituency = Column(String, index=True)
-    votes = relationship("Vote", back_populates='member_of_parliament')
+    commons_division = relationship("Vote", back_populates='member_of_parliament')
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "clerks_id": self.clerks_id,
+            "dods_id": self.dods_id,
+            "member_id": self.member_id,
+            "pims_id": self.pims_id,
+            "full_title": self.full_title,
+            "date_of_birth": self.date_of_birth,
+            "date_of_death": self.date_of_death,
+            "gender": self.gender,
+            "party": self.party,
+            "member_since": self.member_since,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "constituency": self.constituency,
+        }
 
     def __hash__(self):
         return hash((self.id, self.member_id))

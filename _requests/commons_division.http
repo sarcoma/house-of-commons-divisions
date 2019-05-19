@@ -5,6 +5,11 @@
 # * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
 # * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
 
+GET http://localhost:5000
+Accept: application/json
+
+###
+
 GET http://localhost:5000/commons-division
 Accept: application/json
 
@@ -14,7 +19,6 @@ GET http://localhost:5000/commons-division/page/2
 Accept: application/json
 
 ###
-
 
 GET http://localhost:5000/commons-division/1
 Accept: application/json

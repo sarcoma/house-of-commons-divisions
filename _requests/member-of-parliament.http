@@ -15,7 +15,7 @@ Accept: application/json
 
 ###
 
-GET http://localhost:5000/member-of-parliament/1
+GET http://localhost:5000/member-of-parliament/4
 Accept: application/json
 
 ###

@@ -15,12 +15,11 @@ class VoteType(enum.Enum):
 class Vote(Base):
     __tablename__ = 'vote'
 
-    id = Column(Integer, primary_key=True)
-    member_of_parliament_id = Column(Integer, ForeignKey('member_of_parliament.id'))
-    commons_division_id = Column(Integer, ForeignKey('commons_division.id'))
+    member_of_parliament_id = Column(Integer, ForeignKey('member_of_parliament.id'), primary_key=True)
+    commons_division_id = Column(Integer, ForeignKey('commons_division.id'), primary_key=True)
     vote_type = Column(Enum(VoteType))
-    commons_division = relationship("CommonsDivision", back_populates='votes')
-    member_of_parliament = relationship("MemberOfParliament", back_populates='votes')
+    commons_division = relationship("CommonsDivision", back_populates='member_of_parliament')
+    member_of_parliament = relationship("MemberOfParliament", back_populates='commons_division')
 
     def set_vote_type(self, vote_type):
         try:
@@ -32,3 +31,6 @@ class Vote(Base):
                 self.vote_type = VoteType.no_vote
         except KeyError:
             self.vote_type = VoteType.no_vote
+
+    def to_dict(self):
+        return self.vote_type.value

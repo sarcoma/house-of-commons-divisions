@@ -1,6 +1,6 @@
 venv
-flask.cfg
 .gitignore
 _requests
-commons-divisions.db
+commons_divisions/flask.cfg
+commons_divisions/commons-divisions.db
 

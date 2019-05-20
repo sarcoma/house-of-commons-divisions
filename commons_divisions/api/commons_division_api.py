@@ -1,7 +1,7 @@
 from sqlalchemy.orm import joinedload
 
-from api.base_api import BaseApi
-from models.commons_division import CommonsDivision
+from commons_divisions.api.base_api import BaseApi
+from commons_divisions.models.commons_division import CommonsDivision
 
 
 class CommonsDivisionApi(BaseApi):

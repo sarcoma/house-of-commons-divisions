@@ -1,7 +1,7 @@
 from abc import ABCMeta
 
-from orm.base import Base
-from orm.orm import session_factory
+from commons_divisions.orm.base import Base
+from commons_divisions.orm.orm import session_factory
 
 
 class BaseApi(metaclass=ABCMeta):

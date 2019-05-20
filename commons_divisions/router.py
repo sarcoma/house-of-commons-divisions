@@ -3,10 +3,10 @@
 
 from flask import Blueprint
 
-from api.commons_division_api import CommonsDivisionApi
-from api.member_of_parliament_api import MemberOfParliamentApi
-from request.json_request import JsonRequest
-from response.json_response import json_response
+from commons_divisions.api.commons_division_api import CommonsDivisionApi
+from commons_divisions.api.member_of_parliament_api import MemberOfParliamentApi
+from commons_divisions.request.json_request import JsonRequest
+from commons_divisions.response.json_response import json_response
 
 router = Blueprint('router', __name__)
 

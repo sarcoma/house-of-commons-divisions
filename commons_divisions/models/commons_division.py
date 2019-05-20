@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.collections import InstrumentedList
 
-from orm.base import Base
+from commons_divisions.orm.base import Base
 
 
 class CommonsDivision(Base):

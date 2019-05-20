@@ -3,7 +3,7 @@ import enum
 from sqlalchemy import Column, Integer, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 
-from orm.base import Base
+from commons_divisions.orm.base import Base
 
 
 class VoteType(enum.Enum):
@@ -15,8 +15,9 @@ class VoteType(enum.Enum):
 class Vote(Base):
     __tablename__ = 'vote'
 
-    member_of_parliament_id = Column(Integer, ForeignKey('member_of_parliament.id'), primary_key=True)
-    commons_division_id = Column(Integer, ForeignKey('commons_division.id'), primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    member_of_parliament_id = Column(Integer, ForeignKey('member_of_parliament.id'))
+    commons_division_id = Column(Integer, ForeignKey('commons_division.id'))
     vote_type = Column(Enum(VoteType))
     commons_division = relationship("CommonsDivision", back_populates='member_of_parliament')
     member_of_parliament = relationship("MemberOfParliament", back_populates='commons_division')

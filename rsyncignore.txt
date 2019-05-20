@@ -1,0 +1,6 @@
+venv
+flask.cfg
+.gitignore
+_requests
+commons-divisions.db
+

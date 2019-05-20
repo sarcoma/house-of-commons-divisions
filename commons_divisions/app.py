@@ -1,6 +1,6 @@
 from flask import Flask
 
-from router import router
+from commons_divisions.router import router
 
 
 def register_blueprints(app):

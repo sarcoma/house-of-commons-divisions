@@ -1,6 +1,7 @@
 venv
+.idea
+.git
 .gitignore
 _requests
 commons_divisions/flask.cfg
 commons_divisions/commons-divisions.db
-

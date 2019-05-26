@@ -20,7 +20,7 @@ class MPNotFound(Exception):
 def get_data(url):
     try:
         response = requests.get(url)
-        return json.loads(response.content)
+        return json.loads(response.content.decode('utf-8'))
     except JSONDecodeError:
         print('Error: %s' % JSONDecodeError)
         return None

@@ -10,7 +10,7 @@ class CommonsDivision(Base):
 
     id = Column(Integer, primary_key=True)
     division_id = Column(Integer, unique=True)
-    uin = Column(String, unique=True)
+    uin = Column(String)
     title = Column(String, index=True)
     session = Column(String)
     division_number = Column(Integer)

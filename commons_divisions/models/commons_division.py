@@ -43,6 +43,7 @@ class CommonsDivision(Base):
             data['votes'] = [{
                 'vote': vote.vote_type.value,
                 'member_of_parliament': {
+                    'id': vote.member_of_parliament.id,
                     'name': vote.member_of_parliament.name,
                     'party': vote.member_of_parliament.party,
                     'constituency': vote.member_of_parliament.constituency

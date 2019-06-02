@@ -1,5 +1,7 @@
 from abc import ABCMeta
 
+from flask import request
+
 from commons_divisions.orm.base import Base
 from commons_divisions.orm.orm import session_factory
 
@@ -11,12 +13,16 @@ class BaseApi(metaclass=ABCMeta):
         self.session = session_factory()
 
     def get_list(self):
-        data = self.session.query(self.model).all()
+        filters = self._get_filters_from_params()
+        data = self._filter_results(filters)
+
         return [row.to_dict() for row in data]
 
     def get_paginated_list(self, page=1, limit=25):
-        data = self.session.query(self.model).all()[limit * page - limit:limit * page]
-        total = self.session.query(self.model).count()
+        filters = self._get_filters_from_params()
+        data = self._filter_results(filters)[limit * page - limit:limit * page]
+        total = self._filter_results(filters).count()
+
         return {
             "data": [row.to_dict() for row in data],
             "meta": {
@@ -25,6 +31,18 @@ class BaseApi(metaclass=ABCMeta):
                 "limit": limit,
             }
         }
+
+    def _get_filters_from_params(self):
+        filter_param = request.args.get('filter', None)
+        if not filter_param:
+            return {}
+        return {k: v for k, v in [x.split(':') for x in filter_param.split(',')]}
+
+    def _filter_results(self, filters):
+        data = self.session.query(self.model)
+        for search_term in [getattr(self.model, attr).like('%%%s%%' % value) for attr, value in filters.items()]:
+            data = data.filter(search_term)
+        return data
 
     def get_detail_by_id(self, item_id):
         data = self.session.query(self.model).filter(self.model.id == item_id).first()

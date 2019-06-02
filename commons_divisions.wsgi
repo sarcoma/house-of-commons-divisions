@@ -1,15 +1,22 @@
 import sys
 import logging
 
-logging.basicConfig(stream=sys.stderr)
-path = "/var/www/commons-divisions.orderandchaoscreative.com/commons_divisions"
-if path not in sys.path:
-    sys.path.insert(0, path)
+from flask_cors import CORS
 
-activate_this = '/var/www/commons-divisions.orderandchaoscreative.com/venv/bin/activate_this.py'
+directory = "/var/www/site_dir"
+
+logging.basicConfig(stream=sys.stderr)
+sys.path.insert(0, "%s/commons_divisions" % directory)
+
+activate_this = "%s/venv/bin/activate_this.py" % directory
 with open(activate_this) as file_:
     exec(file_.read(), dict(__file__=activate_this))
 
+
 from commons_divisions.app import create_app
 
-application = create_app('flask.cfg')
+app = create_app("%s/flask.cfg"  % directory)
+
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000","https://commonsdivisions.orderandchaoscreative.com"]}}, supports_credentials=True)
+
+application = app

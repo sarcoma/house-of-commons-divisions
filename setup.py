@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='commons_divisions',
-    version='0.1.0',
+    version='0.1.4',
     url='https://github.com/sarcoma/house-of-commons-divisions',
     author='Sarcoma',
     author_email='sean@orderandchaoscreative.com',

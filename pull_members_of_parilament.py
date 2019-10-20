@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup as bs
 # Note: eg http://data.parliament.uk/membersdataplatform/services/mnis/members/query/commonsmemberbetween=2012-01-01and2012-03-31/
 #       Look up data for MPs on any given division day. Compare votes against that list. Add any missing MPs to the database.
 from models.member_of_parliament import MemberOfParliament
-from orm import session_factory, drop_all
+from orm.orm import session_factory, drop_all
 
 
 def get_members_for_date(date):

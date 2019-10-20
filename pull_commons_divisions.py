@@ -9,7 +9,7 @@ import requests
 from models.commons_division import CommonsDivision
 from models.member_of_parliament import MemberOfParliament
 from models.vote import Vote
-from orm import session_factory
+from orm.orm import session_factory
 from pull_members_of_parilament import create_mps_for_date, get_member, create_mp
 
 
@@ -180,6 +180,7 @@ def get_commons_divisions_list(url):
 
 
 if __name__ == '__main__':
+    session_factory()
     next_url = 'http://eldaddp.azurewebsites.net/commonsdivisions.json?_page=0'
     while True:
         print('Fetching: ' + next_url)
